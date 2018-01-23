@@ -3,32 +3,32 @@ const graphqlHTTP = require('express-graphql')
 const { buildSchema } = require('graphql')
 
 const schema = buildSchema(`
+    type RandomDie {
+        rollOnce : Int!
+        roll(numRolls: Int) : [Int]
+    }
+
     type Query {
-        hello : String
-        quoteOfTheDay : String,
-        random : Float,
-        rollThreeDice : [Int]
-        rollNumDice(numDice: Int!)  : [Int]
+        getDie(numSides: Int) : RandomDie
     }
 `)
 
+class RandomDie {
+    rollOnce () {
+        return 1 + Math.floor(Math.random() * this.numSides)
+    }
+    roll({ numRolls }) {
+        let arr = [...Array(numRolls).keys()]
+        return arr.map(i => this.rollOnce())
+    }
+    constructor(numSides) {
+        this.numSides = numSides
+    }
+}
+
 const root = {
-    hello() {
-        return 'Hello World'
-    },
-    quoteOfTheDay() {
-        return Math.random()  < .5 ? 'Take it Easy' : 'Work Hard Today'
-    },
-    random() {
-        return Math.random()
-    },
-    rollThreeDice() {
-        return [1, 2, 3].map( x => 1 + Math.floor(Math.random() * 6))
-    },
-    rollNumDice({ numDice }) {
-        let arr = [...Array(numDice).keys()]
-        let data = arr.map(x => 1 + Math.floor(Math.random() * 6))
-        return data
+    getDie({ numSides }) {
+        return new RandomDie(numSides)
     }
 }
 
