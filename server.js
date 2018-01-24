@@ -55,7 +55,15 @@ class RandomDie {
     }
 }
 
+function loggingMiddleWare(req, res, next) {
+    console.log('ip:' + req.ip)
+    next()
+}
+
 const root = {
+    ip(args, request) {
+        return request.ip
+    },
     getDie({ numSides }) {
         return new RandomDie(numSides)
     },
@@ -80,8 +88,8 @@ const root = {
         return new Message(id, fakeDatabase[id])
     }
 }
-
 const app = express()
+app.use(loggingMiddleWare)
 app.use('/graphql', graphqlHTTP({
     schema,
     rootValue: root,
